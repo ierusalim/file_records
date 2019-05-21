@@ -38,7 +38,7 @@ class FileRecords
             ||
             ($rec_size < 1)
         ) {
-            throw Exception("Record size must be integer and grater than 0");
+            throw new \Exception("Record size must be integer and grater than 0");
         }
         $this->file_name = $file_name;
         $this->rec_size = (int)$rec_size;
@@ -73,11 +73,11 @@ class FileRecords
     public function readRecord($rec_num)
     {
         if (!$this->f) {
-            if (!$this->fopen('r', false)) {
-                throw new Exception("Can't open file");
+            if (! @$this->fopen('r', false)) {
+                throw new \Exception("Can't open file");
             }
         }
-        if ($rec_num >= $this->rec_cnt) {
+        if (($rec_num >= $this->rec_cnt) || ($rec_num<0)) {
             return false;
         }
         fseek($this->f, $this->rec_size * $rec_num);
@@ -90,7 +90,7 @@ class FileRecords
      */
     public function fclose() {
         if ($this->f) {
-            fclose($this->f);
+            @fclose($this->f);
         }
         $this->f = false;
     }
@@ -117,7 +117,7 @@ class FileRecords
             $f_mode = 'rb+';
             break;
         default:
-            throw new Exception("Unrecognized mode: $f_mode \nSupported: r, a, w");
+            throw new \Exception("Unrecognized mode: $new_f_mode \nSupported: r, w, a");
         }
 
         // if file already open
@@ -131,9 +131,14 @@ class FileRecords
             $this->fclose();
         }
 
-        $this->recordsCount();
+        $rec_cnt = $this->recordsCount();
 
-        $this->f = fopen($this->file_name, $f_mode);
+        if (!$rec_cnt && ($f_mode === 'rb+')) {
+            // Can't open file to reWrite if no records
+            return false;
+        }
+
+        $this->f = @fopen($this->file_name, $f_mode);
         if (!$this->f) {
             return false;
         }
@@ -154,7 +159,7 @@ class FileRecords
     {
         $size = strlen($data);
         if ($size != $this->rec_size) {
-            throw new Exception("Different record size: $size (need {$this->rec_size})");
+            throw new \Exception("Different record size: $size (need {$this->rec_size})");
         }
         $f = $this->fopen('ab+', false);
         if (!$f) {
@@ -163,12 +168,9 @@ class FileRecords
 
         $rec_nmb = $this->rec_cnt;
 
-        $bcnt = fwrite($f, $data, $size);
-        if ($bcnt === false) {
-            return "ERROR: Can't write record #{$rec_nmb} to file";
-        }
+        $bcnt = @fwrite($f, $data, $size);
         if ($bcnt !== $size) {
-            return "ERROR: Size of writed-data #{$rec_nmb} is $bcnt different of $size";
+            return "ERROR: Can't write record #{$rec_nmb} to file\n" . error_get_last()['message'];
         }
         $this->rec_cnt++;
         $this->file_size += $size;
@@ -189,11 +191,11 @@ class FileRecords
     {
         $size = strlen($data);
         if ($size != $this->rec_size) {
-            throw new Exception("Different record size: $size (need {$this->rec_size})");
+            throw new \Exception("Different record size: $size (need {$this->rec_size})");
         }
         $rec_max = $this->recordsCount() - 1;
         if (($rec_num < 0) || ($rec_num > $rec_max)) {
-            throw new Exception("Record #$rec_num out of records range [0 - $rec_max)");
+            return "Record #$rec_num out of records range [0 - $rec_max)";
         }
 
         $f = $this->fopen('rb+', false);
@@ -203,14 +205,13 @@ class FileRecords
 
         $seek_pos = $rec_num * $this->rec_size;
 
-        fseek($f, $seek_pos);
-
-        $bcnt = fwrite($f, $data, $size);
-        if ($bcnt === false) {
-            return "ERROR: Can't write record #{$rec_nmb} to file";
+        if (@fseek($f, $seek_pos)) {
+            return "ERROR: Can't fseek record #{$rec_num}\n" . error_get_last()['message'];
         }
+
+        $bcnt = @fwrite($f, $data, $size);
         if ($bcnt !== $size) {
-            return "ERROR: Size of writed-data #{$rec_nmb} is $bcnt different of $size";
+            return "ERROR: Can't write record #{$rec_num}\n". error_get_last()['message'];
         }
         return $rec_num;
     }
