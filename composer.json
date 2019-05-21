@@ -1,0 +1,23 @@
+{
+    "name": "ierusalim/FileRecords",
+    "description": "Simple engine for Read, Append, reWrite fixed-size records in the file",
+    "keywords": ["file", "fixedsize", "fwrite", "fread", "nosql"],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Alexander Jer",
+            "email": "alex@ierusalim.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.8.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "ierusalim\\FileRecords\\": "src/"
+        }
+    }
+}
