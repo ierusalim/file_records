@@ -220,7 +220,7 @@ class FileRecordsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($rcnt3, $rcnt4);
 
         // try write to file with bad file name
-        $x = new FileRecords('bad*file', $this->test_len);
+        $x = new FileRecords('bad &*file|', $this->test_len);
         $ans = $x->appendRecord($data);
         $this->assertTrue(is_string($ans));
 
