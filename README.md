@@ -1,5 +1,12 @@
 # FileRecords
 
+## Functions:
+
+- ->new FileRecords($file_name, $record_size)
+- ->appendRecord($data)
+- ->readRecord($record_number)
+- ->reWriteRecord($record_number, $new_data)
+
 ## Example:
 
 ```php
@@ -17,7 +24,7 @@
     // 2
 
     echo $fr->readRecord(1);
-    // Abc defg"
+    // Abc defg
     echo $fr->readRecord(0);
     // 01234567
 
