@@ -1,4 +1,6 @@
 # FileRecords
+[![Build Status](https://api.travis-ci.org/ierusalim/file_records.svg?branch=master)](https://www.travis-ci.org/ierusalim/file_records)
+
 
 ## Functions:
 
