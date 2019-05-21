@@ -1,5 +1,5 @@
 {
-    "name": "ierusalim/FileRecords",
+    "name": "ierusalim/file-records",
     "description": "Simple engine for Read, Append, reWrite fixed-size records in the file",
     "keywords": ["file", "fixedsize", "fwrite", "fread", "nosql"],
     "license": "Apache-2.0",
