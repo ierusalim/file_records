@@ -13,7 +13,7 @@
 
 ```php
 <?php
-    namespace ierusalim\ClickHouse;
+    namespace ierusalim\FileRecords;
 
     require "vendor/autoload.php";
 
