@@ -4,6 +4,15 @@ namespace ierusalim\FileRecords;
 /**
  * This class contains FileRecords
  *
+ * Designed to work with fixed-size records
+ *
+ * Functions:
+ * new FileRecords($fileName,$record_size) - init for work with specified file
+ * ->recordsCount() - return records count (counted as file_size / record_size)
+ * ->appendRecord($data) - append fixed-size string to end of file, return record number
+ * ->readRecord($number) - read fixed-size string from file by record-number
+ * ->reWriteRecord($number,$data) - re-Write new fixed-string over old by record-number
+ *
  * PHP Version >= 5.6
  *
  * @package    ierusalim\FileRecords
@@ -51,9 +60,9 @@ class FileRecords
      *
      * @return integer
      */
-    public function recordsCount()
+    public function recordsCount($recount = false)
     {
-        if (!$this->f) {
+        if (!$this->f || $recount) {
             $this->file_size = @filesize($this->file_name);
             if (!$this->file_size) {
                 $this->file_size = 0;
@@ -80,8 +89,10 @@ class FileRecords
         if (($rec_num >= $this->rec_cnt) || ($rec_num<0)) {
             return false;
         }
-        fseek($this->f, $this->rec_size * $rec_num);
-        $data = fread($this->f, $this->rec_size);
+        if (\fseek($this->f, $this->rec_size * $rec_num)) {
+            return false;
+        }
+        $data = \fread($this->f, $this->rec_size);
         return $data;
     }
 
@@ -90,11 +101,15 @@ class FileRecords
      */
     public function fclose() {
         if ($this->f) {
-            @fclose($this->f);
+            @\fclose($this->f);
         }
         $this->f = false;
     }
 
+    public function __destruct()
+    {
+        $this->fclose();
+    }
     /**
      * Open file for Read, Append or reWrite mode.
      *
@@ -165,15 +180,22 @@ class FileRecords
         if (!$f) {
             return "ERROR: Can't open file for append";
         }
+        if (@\flock($f, \LOCK_EX)) {
+            \clearstatcache(true, $this->file_name);
+            $rec_nmb = $this->recordsCount(true);
 
-        $rec_nmb = $this->rec_cnt;
+            $bcnt = @\fwrite($f, $data, $size);
+            \flock($f, \LOCK_UN);
+            \clearstatcache(true, $this->file_name);
+            if ($bcnt !== $size) {
+                return "ERROR: Can't write record #{$rec_nmb} to file\n" . error_get_last()['message'];
+            }
+            $this->rec_cnt = $rec_nmb + 1;
+            $this->file_size += $size;
 
-        $bcnt = @fwrite($f, $data, $size);
-        if ($bcnt !== $size) {
-            return "ERROR: Can't write record #{$rec_nmb} to file\n" . error_get_last()['message'];
+        } else {
+            return "ERROR: Can't lock file";
         }
-        $this->rec_cnt++;
-        $this->file_size += $size;
         return $rec_nmb;
     }
 
