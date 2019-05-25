@@ -26,6 +26,7 @@ class FileRecords
     public $rec_size;
     public $rec_cnt;
     public $file_size;
+    public $file_size_limit = false;
     public $f = false; // fopen-descriptor (false if not open)
     public $f_mode;
 
@@ -183,7 +184,10 @@ class FileRecords
         if (@\flock($f, \LOCK_EX)) {
             \clearstatcache(true, $this->file_name);
             $rec_nmb = $this->recordsCount(true);
-
+            if ($this->file_size_limit && (($this->file_size + $size) > $this->file_size_limit)) {
+                \flock($f, \LOCK_UN);
+                return "FILE_SIZE_LIMIT is reached";
+            }
             $bcnt = @\fwrite($f, $data, $size);
             \flock($f, \LOCK_UN);
             \clearstatcache(true, $this->file_name);

@@ -206,6 +206,12 @@ class FileRecordsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($rcnt + 2, $rcnt3);
         $this->assertEquals($rcnt3-1,$ans);
 
+        // File Limit test
+        $o->file_size_limit = $o->file_size;
+        $ans = $o->appendRecord($data);
+        $this->assertEquals("FILE_SIZE_LIMIT is reached", $ans);
+        $o->file_size_limit = false;
+
         // make problem
         $f = $o->f;
         fclose($f);
