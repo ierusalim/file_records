@@ -9,7 +9,7 @@ define("TMP_PATH", 'tmp' . DIRECTORY_SEPARATOR);
 class FileRecordsTest extends \PHPUnit_Framework_TestCase
 {
     public $test_file = TMP_PATH . 'testfile.txt';
-    public $test_len =32;
+    public $test_len = 32;
     /**
      * @var FileRecords
      */
