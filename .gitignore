@@ -1,5 +1,4 @@
-/tests/testfile.txt
+/tests/tmp
 /start.php
-/test.dat
-/test.dr
 /concurrent_test.php
+/concurrent_dr.php
