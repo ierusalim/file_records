@@ -1,4 +1,5 @@
 /tests/tmp
 /start.php
+/src/HashNum.php
 /concurrent_test.php
 /concurrent_dr.php
