@@ -1,7 +1,6 @@
 <?php
 namespace ierusalim\FileRecords;
 
-define ('NP_FILE', 'nameprog.tmp');
 /**
  * Rows: 64 bytes each
  *  [0] 4 - last-time  or 0 for free cell
@@ -16,35 +15,23 @@ class nameProgress
     public $base_path;
     public $fr = false;
     public $np_rows = 50;
+    public $np_file = 'nameprog.tmp';
 
     public $content = false;
 
     public function getFr()
     {
         if ($this->fr === false) {
-            $this->fr = new FileRecords($this->base_path . NP_FILE, 64);
+            $this->fr = new FileRecords($this->base_path . $this->np_file, 64);
         }
         return $this->fr;
     }
 
     public function __construct($base_path = '.', $np_rows = 50)
     {
-        if (!is_dir($base_path)) {
+        $base_path = realpath($base_path);
+        if ($base_path === false) {
             throw new \Exception('Path not found');
-        }
-        $c = substr($base_path, -1);
-        if ($c === '/' || $c === "\\") {
-            $base_path = substr($base_path, 0, -1);
-        }
-        $c = $base_path[0];
-
-        $cwd = \getcwd();
-        if ($base_path === '.') {
-            $base_path = $cwd;
-        } elseif ( ($c !== '/') && ($c !== "\\") &&
-           ((strlen($base_path)>1) && ($base_path[1] !==  ':'))
-        ) { // relative path convert to absolute
-            $base_path = $cwd . DIRECTORY_SEPARATOR . $base_path;
         }
         $this->base_path = $base_path . DIRECTORY_SEPARATOR;
         $this->np_rows = $np_rows;
@@ -53,7 +40,7 @@ class nameProgress
     public function getContent($reload = false)
     {
         if ($reload || ($this->content === false)) {
-            $file_name = $this->base_path . NP_FILE;
+            $file_name = $this->base_path . $this->np_file;
             $file_size = $this->np_rows * 64;
             if (is_file($file_name)) {
                 $content = file_get_contents($file_name);
@@ -122,7 +109,7 @@ class nameProgress
         return compact('free');
     }
 
-    public function nameSquat($file_name, $time_drop)
+    public function nameSquat($file_name, $time_drop, $time_offset = 0)
     {
         $stat = $this->nameScan($file_name);
         $old_tmp = false;
@@ -143,7 +130,8 @@ class nameProgress
         $tmp = $this->genTmp();
 
         $fr = $this->getFr();
-        $rec = pack('N', time()) . chr(0) . $tmp .  chr(strlen($file_name)) . $file_name;
+        $rec = pack('N', time() + $time_offset) . chr(0) . $tmp
+            .  chr(strlen($file_name)) . $file_name;
         //$rec = str_pad($rec, 64, chr(0), STR_PAD_RIGHT);
         $ans = $fr->reWriteRecord($cell, $rec, true);
         $this->content = false;
@@ -169,11 +157,11 @@ class nameProgress
         return $rec;
     }
 
-    public function updateProgress($cell, $progByte = 0)
+    public function updateProgress($cell, $progByte = 0, $time_offset = 0)
     {
         $this->content = false;
         $fr = $this->getFr();
-        $rec = pack('N', time()) . chr($progByte);
+        $rec = pack('N', time() + $time_offset) . chr($progByte);
         return $fr->reWriteRecord($cell, $rec, true);
     }
 
