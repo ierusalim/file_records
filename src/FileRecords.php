@@ -213,10 +213,10 @@ class FileRecords
      * @return integer|string
      * @throws Exception
      */
-    public function reWriteRecord($rec_num, $data)
+    public function reWriteRecord($rec_num, $data, $ignore = false)
     {
         $size = strlen($data);
-        if ($size != $this->rec_size) {
+        if (!$ignore && ($size != $this->rec_size)) {
             throw new \Exception("Different record size: $size (need {$this->rec_size})");
         }
         $rec_max = $this->recordsCount() - 1;

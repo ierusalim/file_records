@@ -3,3 +3,5 @@
 /src/HashNum.php
 /concurrent_test.php
 /concurrent_dr.php
+/test-*
+/test.*
