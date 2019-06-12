@@ -205,12 +205,29 @@ class FileRecordsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($rcnt + 1, $rcnt2);
 
+        // try add array
+        $arr = [
+            str_repeat('A', $this->test_len),
+            str_repeat('B', $this->test_len),
+            str_repeat('C', $this->test_len),
+        ];
+
+        $o->appendRecord($arr);
+
+        $rcnt3 = $o->recordsCount();
+
+        $this->assertEquals($rcnt2 + 3, $rcnt3);
+
+        // unsupported data type
+        $ret = $o->appendRecord($o->f);
+        $this->assertTrue(is_string($ret));
+
         $o->fclose();
 
         $ans = $o->appendRecord($data);
-        $rcnt3 = $o->recordsCount();
-        $this->assertEquals($rcnt + 2, $rcnt3);
-        $this->assertEquals($rcnt3-1,$ans);
+        $rcnt4 = $o->recordsCount();
+        $this->assertEquals($rcnt3 + 1, $rcnt4);
+        $this->assertEquals($rcnt4 - 1,$ans);
 
         // File Limit test
         $o->file_size_limit = $o->file_size;
@@ -227,9 +244,9 @@ class FileRecordsTest extends \PHPUnit_Framework_TestCase
         // try add next record
         $ans = $o->appendRecord($data);
         $this->assertTrue(is_string($ans));
-        $rcnt4 = $o->recordsCount();
+        $rcnt5 = $o->recordsCount();
 
-        $this->assertEquals($rcnt3, $rcnt4);
+        $this->assertEquals($rcnt4, $rcnt5);
 
         // try write to file with bad file name
         $x = new FileRecords('bad &*file|', $this->test_len);
@@ -276,5 +293,95 @@ class FileRecordsTest extends \PHPUnit_Framework_TestCase
 
         $this->setExpectedException("\Exception");
         $n = $o->reWriteRecord($rec_cnt, 'abc');
+    }
+
+    /**
+     * @covers ierusalim\FileRecords\FileRecords::packN
+     * @todo   Implement testPackN().
+     */
+    public function testPackN()
+    {
+        $o = $this->object;
+        $d = 1;
+        $s = chr(1);
+        for ($n = 1; $n <= 8; $n++) {
+            $r = $o->packN($d, $n);
+            $this->assertEquals($s, $r);
+            $d = $d * 256;
+            $s .= chr(0);
+        }
+        $d = 255;
+        $s = chr(255);
+        for ($n = 1; $n < 8; $n++) {
+            $r = $o->packN($d, $n);
+            $this->assertEquals(str_repeat(chr(255),$n), $r);
+            $r = $o->packN($d+1, $n);
+            $this->assertFalse($r);
+            $d = $d * 256 + 255;
+            $s .= chr(255);
+        }
+
+        $r = $o->packN(-1, 1);
+        $this->assertFalse($r);
+
+        $r = $o->packN(1, 9);
+        $this->assertFalse($r);
+    }
+
+    /**
+     * @covers ierusalim\FileRecords\FileRecords::unpackN
+     * @todo   Implement testUnpackN().
+     */
+    public function testUnpackN()
+    {
+        $o = $this->object;
+        $d = 1;
+        $s = chr(1);
+        for ($n = 1; $n <= 8; $n++) {
+            $r = $o->packN($d, $n);
+            $this->assertEquals($s, $r);
+            $u = $o->unpackN($r);
+            $this->assertEquals($d, $u);
+            $d = $d * 256;
+            $s .= chr(0);
+        }
+    }
+
+    /**
+     * @covers ierusalim\FileRecords\FileRecords::getHttpRange
+     * @todo   Implement testGetHttpRange().
+     */
+    public function testGetHttpRange()
+    {
+        $o = $this->object;
+        $far = $o->getHttpRange('https://www.php.com/contact',1, 8);
+        $this->assertEquals('!doctype', $far['data']);
+    }
+
+    /**
+     * @covers ierusalim\FileRecords\FileRecords::getPart
+     * @todo   Implement testGetPart().
+     */
+    public function testGetPart()
+    {
+        $o = $this->object;
+        $far = $o->getPart('https://www.php.com/contact',1, 8);
+        $this->assertEquals('!doctype', $far['data']);
+
+        $far = $o->getPart(__FILE__,1,4);
+        $this->assertEquals('?php', $far['data']);
+
+        $f = fopen(__FILE__, 'rb');
+        $far = $o->getPart($f, 1, 4);
+        $this->assertEquals('?php', $far['data']);
+        fclose($f);
+
+        // not found local file
+        $far = $o->getPart(__FILE__ . 'x' , 1, 4);
+        $this->assertFalse($far['data']);
+
+        // not found URL (404 error)
+        $far = $o->getPart('http://www.php.com/contacties',1, 8);
+        $this->assertFalse($far['data']);
     }
 }

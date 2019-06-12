@@ -10,12 +10,12 @@ namespace ierusalim\FileRecords;
  * [14] 50 - file name
  */
 
-class nameProgress
+class nameSquat
 {
     public $base_path;
     public $fr = false;
     public $np_rows = 50;
-    public $np_file = 'nameprog.tmp';
+    public $np_file = 'namesquat.tmp';
 
     public $content = false;
 
