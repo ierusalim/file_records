@@ -109,7 +109,7 @@ class nameSquat
         return compact('free');
     }
 
-    public function nameSquat($file_name, $time_drop, $time_offset = 0)
+    public function squat($file_name, $time_drop, $time_offset = 0)
     {
         $stat = $this->nameScan($file_name);
         $old_tmp = false;

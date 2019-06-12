@@ -94,7 +94,7 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $arr);
 
         // create row
-        $r = $np->nameSquat('test', 1);
+        $r = $np->squat('test', 1);
 
         $arr = $np->getAll();
         $this->assertArrayHasKey('test', $arr);
@@ -109,8 +109,8 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
         $np = $this->object;
 
         // create name 'test'
-        $r = $np->nameSquat('test', 1);
-        $r = $np->nameSquat('test2', 1);
+        $r = $np->squat('test', 1);
+        $r = $np->squat('test2', 1);
 
         $arr = $np->nameScan('test');
         $this->assertArrayHasKey('cell', $arr);
@@ -130,29 +130,29 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ierusalim\FileRecords\nameSquat::nameSquat
-     * @todo   Implement testNameSquat().
+     * @covers ierusalim\FileRecords\nameSquat::squat
+     * @todo   Implement testSquat().
      */
-    public function testNameSquat()
+    public function testSquat()
     {
         $np = $this->object;
 
         $base_name = 'test';
 
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('cell', $arr);
             $cell = $arr['cell'];
             $this->assertTrue(is_numeric($cell));
         }
 
         // no free cells
-        $str = $np->nameSquat($base_name . $cell, 1);
+        $str = $np->squat($base_name . $cell, 1);
         $this->assertEquals('No free cells', $str);
 
         // test all names busy
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $str = $np->nameSquat($base_name . $cell, 2);
+            $str = $np->squat($base_name . $cell, 2);
             $this->assertEquals('busy', substr($str, 0, 4));
         }
 
@@ -162,7 +162,7 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
 
         // test all names expired
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('old_tmp', $arr);
         }
 
@@ -179,7 +179,7 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
         $base_name = 'test';
 
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('cell', $arr);
             $cell = $arr['cell'];
             $this->assertTrue(is_numeric($cell));
@@ -204,7 +204,7 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
         $base_name = 'test';
 
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('cell', $arr);
             $cell = $arr['cell'];
             $this->assertTrue(is_numeric($cell));
@@ -234,14 +234,14 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
         $base_name = 'test';
 
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('cell', $arr);
             $cell = $arr['cell'];
             $this->assertTrue(is_numeric($cell));
         }
 
         // no free cells
-        $str = $np->nameSquat($base_name . $cell, 1);
+        $str = $np->squat($base_name . $cell, 1);
         $this->assertEquals('No free cells', $str);
 
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
@@ -255,14 +255,14 @@ class nameSquatTest extends \PHPUnit_Framework_TestCase
 
         // squat again
         for ($cell = 0; $cell < $np->np_rows; $cell++) {
-            $arr = $np->nameSquat($base_name . $cell, 2);
+            $arr = $np->squat($base_name . $cell, 2);
             $this->assertArrayHasKey('cell', $arr);
             $cell = $arr['cell'];
             $this->assertTrue(is_numeric($cell));
         }
 
         // no free cells
-        $str = $np->nameSquat($base_name . $cell, 1);
+        $str = $np->squat($base_name . $cell, 1);
         $this->assertEquals('No free cells', $str);
 
     }
